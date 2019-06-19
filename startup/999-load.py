@@ -18,13 +18,24 @@ from xpdacq.xpdacq_conf import (glbl_dict, configure_device,
                                 _reload_glbl, _set_glbl,
                                 _load_beamline_config)
 
+os.makedirs(glbl_dict['home_dir'],exist_ok=True)
+if not os.path.exists(glbl_dict['blconfig_path']):
+     import yaml
+     os.makedirs(os.path.dirname(glbl_dict['blconfig_path']), exist_ok=True)
+     with open(glbl_dict['blconfig_path'], 'w') as f:
+         yaml.dump({'hello': 'world'}, f)
+
 # configure experiment device being used in current version
 if glbl_dict['is_simulation']:
     from xpdacq.simulation import xpd_pe1c, cs700, shctl1, fb
-    from xpdsim import xpd_pe2c
+    from xpdsim import *
+    from ophyd.sim import hw
+    hw = hw()
     from databroker import Broker
     from ophyd.sim import NumpySeqHandler
+    import copy
     db = Broker.named(glbl_dict['exp_broker_name'])
+    db.prepare_hook = lambda name, doc: copy.deepcopy(doc)
     db.reg.register_handler('NPY_SEQ', NumpySeqHandler)
 
     configure_device(area_det=xpd_pe1c, shutter=shctl1,
