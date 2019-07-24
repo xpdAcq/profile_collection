@@ -14,6 +14,10 @@
 #
 ##############################################################################
 import os
+
+from xpdconf.conf import glbl_dict
+_exp_db = glbl_dict['exp_db']
+
 from xpdacq.xpdacq_conf import (glbl_dict, configure_device,
                                 _reload_glbl, _set_glbl,
                                 _load_beamline_config)
@@ -34,9 +38,10 @@ if glbl_dict['is_simulation']:
     from databroker import Broker
     from ophyd.sim import NumpySeqHandler
     import copy
-    db = Broker.named(glbl_dict['exp_broker_name'])
-    db.prepare_hook = lambda name, doc: copy.deepcopy(doc)
-    db.reg.register_handler('NPY_SEQ', NumpySeqHandler)
+    db = glbl_dict.get('exp_db', _exp_db)
+    # db = Broker.named(glbl_dict['exp_broker_name'])
+    # db.prepare_hook = lambda name, doc: copy.deepcopy(doc)
+    # db.reg.register_handler('NPY_SEQ', NumpySeqHandler)
 
     configure_device(area_det=xpd_pe1c, shutter=shctl1,
                      temp_controller=cs700, db=db, filter_bank=fb)
